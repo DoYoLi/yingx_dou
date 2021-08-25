@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.baizhi.dao.VideoDao">
+    <!--手动映射-->
+    <resultMap id="video" type="cn.baizhi.entity.Video">
+        <!--主属性-->
+        <id column="id" property="id"/>
+        <!--普通属性 column后写数据库列名 property后写实体类映射名-->
+        <result column="title" property="title"/>
+        <result column="brief" property="brief"/>
+        <result column="cover_path" property="coverPath"/>
+        <result column="video_path" property="videoPath"/>
+        <result column="create_date" property="createDate"/>
+        <!--关系属性user-->
+        <association property="user" javaType="cn.baizhi.entity.User">
+            <id column="uid" property="id"/>
+            <result column="username" property="username"/>
+        </association>
+        <!--关系属性category-->
+        <association property="category" javaType="cn.baizhi.entity.Category">
+            <id column="cid" property="id"/>
+            <result column="cate_name" property="cateName"/>
+        </association>
+    </resultMap>
+
+    <!--分页查询 List<Video> selectByPage(@Param("start") int start, @Param("end") int end);-->
+    <select id="selectByPage" resultMap="video">
+      select video.id,
+       title,
+       video.brief,
+       cover_path,
+       video_path,
+       create_date,
+       category_id,
+       user_id,
+       group_id,
+       user.id uid,
+       username,
+       cate_name,
+       category.id cid,
+       levels,
+       parent_id
+      from (select id, title, brief, cover_path, video_path, create_date, category_id, user_id, group_id from yx_video
+      limit #{start},#{end}) video
+       left join yx_user user on user.id = video.user_id
+       left join yx_category category on category.id = video.category_id
+    </select>
+    <!--查全部  Integer selectAll();-->
+    <select id="selectAll" resultType="Integer">
+        select count(*) from yx_video
+    </select>
+    <!--删除 void delete(String id);-->
+    <delete id="delete" parameterType="String">
+        delete from yx_video where id=#{id}
+    </delete>
+    <!--//添加-->
+    <!--void insert(Video video);-->
+    <insert id="insert" parameterType="video">
+      insert into yx_video
+      values (#{id},#{title},#{brief},#{coverPath},#{videoPath},#{createDate},#{category.id},#{user.id},#{group.id})
+    </insert>
+</mapper>
